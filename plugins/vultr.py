@@ -22,7 +22,7 @@ def delete_server(instance_name):
     """
     for _instance in list_server()['instances']:
         if _instance['label'] == instance_name:
-            vultr.delete_instance(instance_name)
+            vultr.delete_instance(_instance['id'])
             return True
     return False
 
