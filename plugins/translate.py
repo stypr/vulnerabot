@@ -7,8 +7,8 @@ Translate Format
 """
 from .vendor import papago
 
-def translate_text(self, author, channel_name, message):
-    """ (Translate, str, str, str) -> str
+def translate_text(author, channel_name, message):
+    """ (str, str, str) -> str
 
     Translate text and output
     """

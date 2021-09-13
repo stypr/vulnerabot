@@ -19,7 +19,7 @@ class BotClient(discord.Client):
         """
         Print after Login
         """
-        print("Logged on as", self.user)
+        print("Logged in as", self.user)
 
     async def on_message(self, message):
         """
@@ -44,7 +44,7 @@ class BotClient(discord.Client):
             # Translate and send message
             if message_content:
                 result = translate.translate_text(
-                    message.author,
+                    str(message.author).split("#")[0],
                     channel_name,
                     message_content
                 )
