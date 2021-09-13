@@ -2,7 +2,7 @@
 
 Multi-purpose Discord bot for stypr's Discord.
 
-[https://discord.gg/hCVpHCdMTf](Discord Server)
+[Discord Server](https://discord.gg/hCVpHCdMTf)
 
 ## Usage
 
