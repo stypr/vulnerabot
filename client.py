@@ -69,7 +69,7 @@ class BotClient(discord.Client):
                 if _command[1] == "list":
                     # List available instances
                     try:
-                        result += ":pencil:\n"
+                        result += ":pencil: List of VPN servers\n"
                         for _instance in vultr.list_server()['instances']:
                             result += f"**{_instance['label']}** http://{_instance['main_ip']}/{VPN_FILENAME}\n"
                     except Exception as e:
@@ -82,17 +82,19 @@ class BotClient(discord.Client):
                     except Exception as e:
                         result = ":warning: Failed to start the server."
                 elif _command[1] == "stop":
+                    # Stop the server
                     try:
                         ret = vultr.delete_server(_command[2])
                         if ret:
-                            result = ":white_check_mark: Delete Success!"
+                            result = ":white_check_mark: Delete Success! It may take some time to remove the server.."
                         else:
                             result = ":warning: Failed to stop the server."
                     except Exception as e:
                         result = ":warning: Failed to stop the server."
                 else:
                     # Help
-                    result += "**-vpn list:** List servers\n"
+                    result += ":thinking: Command List"
+                    result += "**-vpn list:** List available servers\n"
                     result += "**-vpn open:** Open new server\n"
                     result += "**-vpn stop (name):** Delete server\n"
                 await message.channel.send(result)
