@@ -8,13 +8,14 @@ Discord Client
 import re
 import names
 import discord
-from config import DISCORD_TOKEN, VPN_FILENAME, VPN_SNAPSHOT
+from config import DISCORD_GUILD, DISCORD_TOKEN, VPN_FILENAME, VPN_SNAPSHOT
 from plugins import translate, vultr
 
 class BotClient(discord.Client):
     """
     BotClient
     """
+    vpn_region = "icn"
 
     async def on_ready(self):
         """
@@ -28,6 +29,10 @@ class BotClient(discord.Client):
         """
         # don't respond to ourselves
         if message.author == self.user:
+            return
+
+        # ignore other guilds
+        if str(message.guild.id) != DISCORD_GUILD:
             return
 
         # don't listen to DMs
@@ -61,10 +66,12 @@ class BotClient(discord.Client):
                     )
                     await send_channel.send(result)
 
-        # VPN server for #private-vpn
-        if channel_name == "private-vpn":
+        # VPNBot (#vpn)
+        # Customized IP-changable VPN server
+        if channel_name == "vpn":
             if message.content.startswith("-vpn "):
                 result = ""
+
                 _command = message.content.split(" ")
                 if _command[1] == "list":
                     # List available instances
@@ -74,13 +81,15 @@ class BotClient(discord.Client):
                             result += f"       - **{_instance['label']}** http://{_instance['main_ip']}/{VPN_FILENAME}\n"
                     except Exception as e:
                         result = ":warning: Failed to fetch the list."
+
                 elif _command[1] == "open":
                     # Start new server
                     try:
-                        vultr.add_server(names.get_full_name().replace(" ", "_"), VPN_SNAPSHOT)
+                        vultr.add_server(names.get_full_name().replace(" ", "_"), VPN_SNAPSHOT, self.vpn_region)
                         result = ":white_check_mark: Done! It may take some time to start server.."
                     except Exception as e:
                         result = ":warning: Failed to start the server."
+
                 elif _command[1] == "stop":
                     # Stop the server
                     try:
@@ -91,12 +100,24 @@ class BotClient(discord.Client):
                             result = ":warning: Failed to stop the server."
                     except Exception as e:
                         result = ":warning: Failed to stop the server."
+
+                elif _command[1] == "region":
+                    # set region
+                    if _command[2] in ("nrt", "icn", "sgp", "lax", "sjc"):
+                        self.vpn_region = _command[2]
+                        result = ":white_check_mark: Region set!"
+                    else:
+                        result = ":warning: Invalid Region! (Available: nrt, icn, sgp, lax, sjc)"
+
                 else:
                     # Help
-                    result += ":thinking: List of commands\n"
+                    result += ":thinking: **List of commands**\n"
                     result += "       **-vpn list:** List available servers\n"
-                    result += "       **-vpn open:** Open new server\n"
+                    result += "       **-vpn open:** Open a new server\n"
                     result += "       **-vpn stop (name):** Delete server\n"
+                    result += "       **-vpn region (name):** Set server's location\n"
+                    result += f"          - Currently set as **{self.vpn_region}**."
+
                 await message.channel.send(result)
 
         # Ping
@@ -108,4 +129,3 @@ if __name__ == "__main__":
     client = BotClient()
     print("Logging in..")
     client.run(DISCORD_TOKEN)
-
