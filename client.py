@@ -71,7 +71,7 @@ class BotClient(discord.Client):
                     try:
                         result += ":pencil: List of VPN servers\n"
                         for _instance in vultr.list_server()['instances']:
-                            result += f"**{_instance['label']}** http://{_instance['main_ip']}/{VPN_FILENAME}\n"
+                            result += f"    - **{_instance['label']}** http://{_instance['main_ip']}/{VPN_FILENAME}\n"
                     except Exception as e:
                         result = ":warning: Failed to fetch the list."
                 elif _command[1] == "open":
@@ -93,10 +93,10 @@ class BotClient(discord.Client):
                         result = ":warning: Failed to stop the server."
                 else:
                     # Help
-                    result += ":thinking: Command List"
-                    result += "**-vpn list:** List available servers\n"
-                    result += "**-vpn open:** Open new server\n"
-                    result += "**-vpn stop (name):** Delete server\n"
+                    result += ":thinking: List of commands\n"
+                    result += "    - **-vpn list:** List available servers\n"
+                    result += "    - **-vpn open:** Open new server\n"
+                    result += "    - **-vpn stop (name):** Delete server\n"
                 await message.channel.send(result)
 
         # Ping
