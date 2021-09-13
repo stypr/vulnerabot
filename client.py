@@ -6,9 +6,10 @@ client.py
 Discord Client
 """
 import re
+import names
 import discord
-from config import DISCORD_TOKEN
-from plugins import translate
+from config import DISCORD_TOKEN, VPN_FILENAME, VPN_SNAPSHOT
+from plugins import translate, vultr
 
 class BotClient(discord.Client):
     """
@@ -29,9 +30,15 @@ class BotClient(discord.Client):
         if message.author == self.user:
             return
 
+        # don't listen to DMs
+        if isinstance(message.channel, discord.DMChannel):
+            return
+
+        channel_name = message.channel.name
+        message_content = message.content
+
         # TranslateBot
         # Translate all messages over general-*
-        channel_name = message.channel.name
         if channel_name.startswith("general-") and "translate" not in channel_name:
             # Strip some messages
             message_content = message.content
@@ -54,13 +61,49 @@ class BotClient(discord.Client):
                     )
                     await send_channel.send(result)
 
+        # VPN server for #private-vpn
+        if channel_name == "private-vpn":
+            if message.content.startswith("-vpn "):
+                result = ""
+                _command = message.content.split(" ")
+                if _command[1] == "list":
+                    # List available instances
+                    try:
+                        result += ":pencil:\n"
+                        for _instance in vultr.list_server()['instances']:
+                            result += f"**{_instance['label']}** http://{_instance['main_ip']}/{VPN_FILENAME}\n"
+                    except Exception as e:
+                        result = ":warning: Failed to fetch the list."
+                elif _command[1] == "open":
+                    # Start new server
+                    try:
+                        vultr.add_server(names.get_full_name().replace(" ", "_"), VPN_SNAPSHOT)
+                        result = ":white_check_mark: Done! It may take some time to start server.."
+                    except Exception as e:
+                        result = ":warning: Failed to start the server."
+                elif _command[1] == "stop":
+                    try:
+                        ret = vultr.delete_server(_command[2])
+                        if ret:
+                            result = ":white_check_mark: Delete Success!"
+                        else:
+                            result = ":warning: Failed to stop the server."
+                    except Exception as e:
+                        result = ":warning: Failed to stop the server."
+                else:
+                    # Help
+                    result += "**-vpn list:** List servers\n"
+                    result += "**-vpn open:** Open new server\n"
+                    result += "**-vpn stop (name):** Delete server\n"
+                await message.channel.send(result)
+
         # Ping
         # Simple Ping
-        if message.content == "ping":
+        if message.content == "-ping":
             await message.channel.send("pong")
-
 
 if __name__ == "__main__":
     client = BotClient()
     print("Logging in..")
     client.run(DISCORD_TOKEN)
+
