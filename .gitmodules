@@ -1,0 +1,3 @@
+[submodule "plugins/vendor"]
+	path = plugins/vendor
+	url = git@github.com:stypr/vulnerabot-vendor.git
