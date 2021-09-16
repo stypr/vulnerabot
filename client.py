@@ -90,7 +90,8 @@ async def on_message(message):
 
 @bot.command()
 async def crack(ctx, *args):
-    """ Crack hash by Rainbow Table
+    """ Hash Crack Command
+    Cracks hash by Rainbow Table
 
     -crack (hash): Cracks MD5, SHA-*, RIPEMD320
     """
@@ -160,7 +161,7 @@ async def vpn(ctx, *args):
             else:
                 result = ":warning: Invalid Region! (Available: nrt, icn, sgp, lax, sjc)"
         else:
-            result = f":map: Current region is **{bot.vpn_Region}*.*"
+            result = f":map: Current region is **{bot.vpn_region}*.*"
 
     await ctx.send(result)
 
