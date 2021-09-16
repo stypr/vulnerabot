@@ -5,14 +5,14 @@ translate.py
 
 Translate Format
 """
-from .vendor.papago import Papago
+from .vendor.papago import Papago, check_language
 
 def translate_text(author, channel_name, message):
     """ (str, str, str) -> str
 
     Translate text and output
     """
-    current_lang = papago.check_language(message)
+    current_lang = check_language(message)
     result = {}
 
     if current_lang == "Japanese":
