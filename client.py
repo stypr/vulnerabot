@@ -11,7 +11,7 @@ import names
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from plugins import translate, vultr
+from plugins import translate, vultr, hashcrack
 
 # load envvars
 load_dotenv()
@@ -87,6 +87,19 @@ async def on_message(message):
 
     # do some extra stuff here
     await bot.process_commands(message)
+
+@bot.command()
+async def crack(ctx, *args):
+    """ Crack hash by Rainbow Table
+
+    -crack (hash): Cracks MD5, SHA-*, RIPEMD320
+    """
+    if len(args) != 1:
+        result = ":warning: Invalid command. Check -help crack for more information."
+    else:
+        result =  ctx.send(hashcrack.crack_text(args[0]))
+
+    await ctx.send(result)
 
 bot.vpn_region = "icn" # default region
 @bot.command()
