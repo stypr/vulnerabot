@@ -21,7 +21,11 @@ VPN_FILENAME = os.getenv("VPN_FILENAME")
 VPN_SNAPSHOT = os.getenv("VPN_SNAPSHOT")
 
 # init bot
-bot = commands.Bot(command_prefix='-')
+help_command = commands.DefaultHelpCommand(no_category="Commands")
+bot = commands.Bot(
+    command_prefix='-',
+    description="https://github.com/stypr/vulnerabot",
+    help_command=help_command)
 
 def strip_message(message):
     """ (str) -> str
@@ -87,9 +91,13 @@ async def on_message(message):
 bot.vpn_region = "icn" # default region
 @bot.command()
 async def vpn(ctx, *args):
-    """ (Message, ptr of tuples)
+    """ VPN Management Command
 
-    VPN Bot for #vpn
+    -vpn list: List available servers
+    -vpn open: Open a new server
+    -vpn stop (name): Delete an existing server
+    -vpn region: View current region
+    -vpn region (location): Set region
     """
     channel_name = ctx.channel.name
     result = ""
@@ -100,12 +108,9 @@ async def vpn(ctx, *args):
         return
 
     if args[0] not in ("list", "open", "stop", "region"):
-        result = ":thinking: **List of commands**\n"
-        result += "  **-vpn list:** List available servers\n"
-        result += "  **-vpn open:** Open a new server\n"
-        result += "  **-vpn stop (name):** Delete an existing server\n"
-        result += "  **-vpn region (value):** Set server's location\n"
-        result += f"    - Currently set as **{bot.vpn_region}**."
+        result = ":warning: Invalid command. Check -help vpn for more information."
+        await ctx.send(result)
+        return
 
     if args[0] == "list":
         result = ":pencil: **List of VPN servers**\n"
@@ -116,44 +121,39 @@ async def vpn(ctx, *args):
             result = ":warning: Failed to fetch the list."
 
     if args[0] == "stop":
-        if len(args) != 2:
-            return
-        try:
-            ret = vultr.delete_server(args[1])
-            if ret:
-                result = ":white_check_mark: Delete successful! It may take some time to remove the server.."
-            else:
+        if len(args) == 2:
+            try:
+                ret = vultr.delete_server(args[1])
+                if ret:
+                    result = ":white_check_mark: Delete successful! It may take some time to remove the server.."
+                else:
+                    result = ":warning: Failed to stop the server."
+            except:
                 result = ":warning: Failed to stop the server."
-        except:
-            result = ":warning: Failed to stop the server."
 
     if args[0] == "open":
         if len(args) != 2:
-            return
-        try:
-            vultr.add_server(names.get_full_name().replace(" ", "_"), VPN_SNAPSHOT, bot.vpn_region)
-            result = ":white_check_mark: Open successful! It may take some time to start server.."
-        except:
-            result = ":warning: Failed to start the server."
+            try:
+                vultr.add_server(names.get_full_name().replace(" ", "_"), VPN_SNAPSHOT, bot.vpn_region)
+                result = ":white_check_mark: Open successful! It may take some time to start server.."
+            except:
+                result = ":warning: Failed to start the server."
 
     if args[0] == "region":
-        if len(args) != 2:
-            return
-
-        if args[1] in ("nrt", "icn", "sgp", "lax", "sjc"):
-            bot.vpn_region = args[1]
-            result = f":white_check_mark: Region set to {bot.vpn_region}!"
+        if len(args) == 2:
+            if args[1] in ("nrt", "icn", "sgp", "lax", "sjc"):
+                bot.vpn_region = args[1]
+                result = f":white_check_mark: Region set to {bot.vpn_region}!"
+            else:
+                result = ":warning: Invalid Region! (Available: nrt, icn, sgp, lax, sjc)"
         else:
-            result = ":warning: Invalid Region! (Available: nrt, icn, sgp, lax, sjc)"
+            result = f":map: Current region is **{bot.vpn_Region}*.*"
 
     await ctx.send(result)
 
 @bot.command()
 async def ping(ctx):
-    """ (Message)
-
-    Send pong message
-    """
+    """ Replies pong message """
     await ctx.send('pong')
 
 if __name__ == "__main__":
