@@ -97,7 +97,7 @@ async def crack(ctx, *args):
     if len(args) != 1:
         result = ":warning: Invalid command. Check -help crack for more information."
     else:
-        result =  ctx.send(hashcrack.crack_text(args[0]))
+        result = hashcrack.crack_text(args[0])
 
     await ctx.send(result)
 
