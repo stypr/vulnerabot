@@ -5,7 +5,7 @@ translate.py
 
 Translate Format
 """
-from .vendor import papago
+from .vendor.papago import Papago
 
 def translate_text(author, channel_name, message):
     """ (str, str, str) -> str
@@ -17,16 +17,16 @@ def translate_text(author, channel_name, message):
 
     if current_lang == "Japanese":
         result[':flag_jp:'] = message
-        result[':flag_kr:'] = papago.Papago.translate_text("ja", "ko", message)
-        result[':flag_us:'] = papago.Papago.translate_text("ja", "en", message)
+        result[':flag_kr:'] = Papago.translate_text("ja", "ko", message)
+        result[':flag_us:'] = Papago.translate_text("ja", "en", message)
     elif current_lang == "English":
         result[':flag_us:'] = message
-        result[':flag_kr:'] = papago.Papago.translate_text("en", "ko", message)
-        result[':flag_jp:'] = papago.Papago.translate_text("en", "ja", message)
+        result[':flag_kr:'] = Papago.translate_text("en", "ko", message)
+        result[':flag_jp:'] = Papago.translate_text("en", "ja", message)
     elif current_lang == "Korean":
         result[':flag_kr:'] = message
-        result[':flag_us:'] = papago.Papago.translate_text("ko", "en", message)
-        result[':flag_jp:'] = papago.Papago.translate_text("ko", "ja", message)
+        result[':flag_us:'] = Papago.translate_text("ko", "en", message)
+        result[':flag_jp:'] = Papago.translate_text("ko", "ja", message)
 
     output = f"**@{author[0] + '·' + author[1:]}** from **#{channel_name}** said\n"
     for _key in result:
