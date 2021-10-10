@@ -7,11 +7,12 @@ Discord Client
 """
 import os
 import re
+from io import BytesIO
 import names
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from plugins import translate, vultr, hashcrack
+from plugins import translate, vultr, hashcrack, dbleak
 
 # load envvars
 load_dotenv()
@@ -43,6 +44,9 @@ def strip_message(message):
 
 @bot.event
 async def on_ready():
+    """
+    Returns when the bot becomes alive
+    """
     print("Logged in!")
 
 @bot.event
@@ -73,7 +77,7 @@ async def on_message(message):
 
         if message_content:
             result = translate.translate_text(
-                str(message.author).split("#")[0],
+                str(message.author).split("#", maxsplit=1)[0],
                 channel_name,
                 message_content
             )
@@ -83,7 +87,6 @@ async def on_message(message):
                     name="general-translatebot"
                 )
                 await send_channel.send(result)
-                return
 
     # do some extra stuff here
     await bot.process_commands(message)
@@ -102,10 +105,43 @@ async def crack(ctx, *args):
 
     await ctx.send(result)
 
+@bot.command()
+async def leak(ctx, *args):
+    """ Leak account credentials from breached databases.
+    Exclusively for #vpn and #donator
+
+    -leak account (email_address)
+    -leak domain (domain)
+    """
+    channel_name = ctx.channel.name
+    result = ""
+
+    if channel_name not in ("donator", "vpn"):
+        result = ":warning: You don't have the permission to access this command."
+        await ctx.send(result)
+        return
+
+    if args[0] not in ("account", "domain"):
+        result = ":warning: Invalid command. Check -help leak for more information."
+        await ctx.send(result)
+        return
+
+    if args[0] == "account":
+        result = ":detective: **List of breached accounts**\n"
+        result += dbleak.find_account(args[1], threshold=10)
+        await ctx.send(result)
+
+    if args[0] == "domain":
+        result = ":detective: **List of breached accounts**\n"
+        await ctx.send(result)
+        result = dbleak.find_domain(args[1], threshold=200)
+        await ctx.send(file=discord.File(BytesIO(result.encode()), 'domain_output.csv'))
+
 bot.vpn_region = "icn" # default region
 @bot.command()
 async def vpn(ctx, *args):
     """ VPN Management Command
+    Only for #vpn
 
     -vpn list: List available servers
     -vpn open: Open a new server
@@ -116,7 +152,7 @@ async def vpn(ctx, *args):
     channel_name = ctx.channel.name
     result = ""
 
-    if channel_name != "vpn":
+    if channel_name not in ("vpn"):
         result = ":warning: You don't have the permission to access this command."
         await ctx.send(result)
         return
@@ -168,7 +204,14 @@ async def vpn(ctx, *args):
 @bot.command()
 async def ping(ctx):
     """ Replies pong message """
-    await ctx.send('pong')
+
+    temp_gpu = os.popen("/opt/vc/bin/vcgencmd measure_temp").read().strip()
+    temp_cpu = os.popen("cat /sys/class/thermal/thermal_zone0/temp").read().strip()
+    pc_uptime = os.popen("uptime").read().strip()
+
+    result = f"**GPU:** {temp_gpu.split('temp=')[1]} / **CPU**: {round(float(temp_cpu)/1000.0,1)}'C\n"
+    result += f"**Uptime:** {pc_uptime}"
+    await ctx.send(result)
 
 if __name__ == "__main__":
     print("Logging in..")

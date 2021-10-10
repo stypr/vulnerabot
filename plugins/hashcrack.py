@@ -1,9 +1,9 @@
 #!/usr/bin/python -u
 # -*- coding: utf-8 -*-
 """
-translate.py
+hashcrack.py
 
-Translate Format
+Cracking hashes
 """
 from .vendor.hashcrack import crack_hash
 from collections import Counter

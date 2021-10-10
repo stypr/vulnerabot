@@ -3,7 +3,7 @@
 """
 translate.py
 
-Translate Format
+Translate Helper
 """
 from .vendor.papago import Papago, check_language
 
