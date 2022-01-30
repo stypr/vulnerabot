@@ -10,9 +10,10 @@ import re
 from io import BytesIO
 import names
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from plugins import translate, vultr, hashcrack, dbleak
+from plugins.vendor.dns.whois.DomainProtocol import DomainQuery
 
 # load envvars
 load_dotenv()
@@ -42,11 +43,53 @@ def strip_message(message):
     message = message.strip()
     return message
 
+@tasks.loop(hours=24)
+async def statusbot():
+    """
+    statusbot
+    """
+
+    # send messages to get_channel
+    status_channel = discord.utils.get(
+        bot.get_all_channels(),
+        name="status"
+    )
+
+    # get domain expiration status
+    message = status_channel.get_partial_message(937210067785224242)
+    result = ":link: **Domain List**\n\n"
+    domain_list = [
+        "harold.kim",
+        "stypr.com",
+        "eagle-jump.org",
+        "fe.gy",
+        "stypr.com",
+        "imfast.kr",
+    ]
+    for domain in domain_list:
+        try:
+            domain_result = DomainQuery.query_domain(domain, 3000)
+            result += f"**{domain}**: "
+            # result += f"({domain_result['expiry']}): "
+            result += f"{domain_result['expiry_message']}\n"
+            if ("imfast.kr") in domain:
+                result = result.replace(domain, "[redacted].kr")
+        except:
+            pass
+
+    result += "\n---"
+    await message.edit(content=result)
+
+    # reserved
+    message = status_channel.get_partial_message(937210069483941929)
+    await message.edit(content="Reserved")
+
 @bot.event
 async def on_ready():
     """
-    Returns when the bot becomes alive
+    Logged in check
     """
+    statusbot.start()
     print("Logged in!")
 
 @bot.event
