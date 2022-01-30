@@ -64,7 +64,6 @@ async def statusbot():
         "eagle-jump.org",
         "fe.gy",
         "stypr.com",
-        "imfast.kr",
     ]
     for domain in domain_list:
         try:
