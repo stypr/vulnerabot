@@ -78,10 +78,9 @@ async def statusbot():
 
     result += "\n---"
     await message.edit(content=result)
-
     # reserved
-    message = status_channel.get_partial_message(937210069483941929)
-    await message.edit(content="Reserved")
+    # message = status_channel.get_partial_message(937210069483941929)
+    # await message.edit(content="Reserved")
 
 @bot.event
 async def on_ready():
@@ -135,8 +134,7 @@ async def on_message(message):
 
 @bot.command()
 async def crack(ctx, *args):
-    """ Hash Crack Command
-    Cracks hash by Rainbow Table
+    """ cracking different hashes by rainbow table
 
     -crack (hash): Cracks MD5, SHA-*, RIPEMD320
     """
@@ -149,8 +147,7 @@ async def crack(ctx, *args):
 
 @bot.command()
 async def leak(ctx, *args):
-    """ Leak account credentials from breached databases.
-    Exclusively for #vpn and #donator
+    """ find account credentials from breached databases. (for #donator and #vpn)
 
     -leak account (email_address)
     -leak domain (domain)
@@ -182,8 +179,7 @@ async def leak(ctx, *args):
 bot.vpn_region = "icn" # default region
 @bot.command()
 async def vpn(ctx, *args):
-    """ VPN Management Command
-    Only for #vpn
+    """ VPN management (for #vpn only)
 
     -vpn list: List available servers
     -vpn open: Open a new server

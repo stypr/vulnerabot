@@ -1,0 +1,17 @@
+[Unit]
+Description = vulnerabot
+After = network.target
+ 
+[Service]
+Type = simple
+ExecStart = /usr/bin/python3 client.py
+WorkingDirectory = /srv/vulnerabot/
+User = stypr
+Group = stypr
+Restart = on-failure
+SyslogIdentifier = vulnerabot
+RestartSec = 5
+TimeoutStartSec = infinity
+ 
+[Install]
+WantedBy = multi-user.target
