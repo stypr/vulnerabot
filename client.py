@@ -216,7 +216,7 @@ async def leak(ctx, *args):
 bot.vpn_region = "icn" # default region
 @bot.command()
 async def vpn(ctx, *args):
-    """ VPN management (for #vpn only)
+    """ VPN management (for #vpn)
 
     -vpn list: List available servers
     -vpn open: Open a new server
@@ -330,8 +330,8 @@ async def cctv(ctx, *args):
     await ctx.send(result)
 
 @bot.command()
-async def translatebot(ctx, *args):
-    """ Translatebot feature (for #management)
+async def trans(ctx, *args):
+    """ Configure translatebot (for #management)
 
     -translatebot fetch: fetch server secret
     -translatebot get: get translatebot secret key
