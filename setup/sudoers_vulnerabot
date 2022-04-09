@@ -1,0 +1,1 @@
+stypr ALL= NOPASSWD: /usr/bin/systemctl restart motion.service, /usr/bin/systemctl stop motion.service, /usr/bin/systemctl start motion.service, /usr/bin/systemctl status motion.service
