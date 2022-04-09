@@ -121,6 +121,7 @@ async def on_ready():
     statusbot.start()
     print("Logged in!")
 
+bot.curr_translate_secret = ""
 @bot.event
 async def on_message(message):
     """
@@ -148,10 +149,15 @@ async def on_message(message):
         message_content = strip_message(message_content)
 
         if message_content:
+            if not bot.curr_translate_secret:
+                bot.curr_translate_secret = translate.get_secret()
+                print(f"Current Secret: {bot.curr_translate_secret}")
+
             result = translate.translate_text(
                 str(message.author).split("#", maxsplit=1)[0],
                 channel_name,
-                message_content
+                message_content,
+                bot.curr_translate_secret
             )
             if result:
                 send_channel = discord.utils.get(
@@ -322,6 +328,41 @@ async def cctv(ctx, *args):
         result += f"```\n{res}```"
 
     await ctx.send(result)
+
+@bot.command()
+async def translatebot(ctx, *args):
+    """ Translatebot feature (for #management)
+
+    -translatebot fetch: fetch server secret
+    -translatebot get: get translatebot secret key
+    -translatebot set (value): set translatebot secret key
+    """
+    channel_name = ctx.channel.name
+    result = ""
+
+    if channel_name not in ("management"):
+        result = ":warning: You don't have the permission to access this command."
+        await ctx.send(result)
+        return
+
+    if args[0] not in ("fetch", "get", "set"):
+        result = ":warning: Invalid command. Check -help translatebot for more information."
+        await ctx.send(result)
+        return
+
+    if args[0] == "fetch":
+        res = translate.get_secret().strip()
+        result = f":white_check_mark: **Server Secret Key:** `{res}`"
+
+    if args[0] == "get":
+        result = f":white_check_mark: **Current Secret Key:** `{bot.curr_translate_secret}`"
+
+    if args[0] == "set":
+        bot.curr_translate_secret = args[1].strip()
+        result = ":white_check_mark: Set Successful!"
+
+    await ctx.send(result)
+
 
 if __name__ == "__main__":
     print("Logging in..")
