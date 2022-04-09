@@ -27,7 +27,7 @@ def delete_server(instance_name):
     return False
 
 def add_server(name, snapshot_id, region="icn"):
-    """ (str, str) ->json()
+    """ (str, str) -> json
     Add server based on given snapshot
     """
     return vultr.create_instance(name, snapshot_id, region)

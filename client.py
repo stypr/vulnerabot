@@ -5,6 +5,7 @@ client.py
 
 Discord Client
 """
+import datetime
 import os
 import re
 from io import BytesIO
@@ -76,17 +77,47 @@ async def statusbot():
         except:
             pass
 
-    result += "\n---"
+    result += "\nLast Updated at " + str(datetime.datetime.now())
     await message.edit(content=result)
     # reserved
     # message = status_channel.get_partial_message(937210069483941929)
     # await message.edit(content="Reserved")
+
+@tasks.loop(minutes=1)
+async def cctvbot():
+    """
+    cctvbot
+    """
+
+    temp_cctv_size = int(os.popen("ls -al /mnt/usb/cctv/ 2>&1 | wc -l").read().strip())
+    try:
+        curr_cctv_size = int(open("/tmp/cctv_size", "rb").read().strip())
+    except:
+        curr_cctv_size = 0
+
+    if temp_cctv_size != curr_cctv_size:
+        motion_detected = True
+        f = open("/tmp/cctv_size", "w")
+        f.write(str(temp_cctv_size))
+        f.close()
+    else:
+        motion_detected = False
+
+    if motion_detected:
+        # send messages to get_channel
+        general_channel = discord.utils.get(
+            bot.get_all_channels(),
+            name="cctv"
+        )
+        result = f":warning: cctvbot: hey <@346163688102821888>, motion detected! (curr:{temp_cctv_size} != prev:{curr_cctv_size})"
+        await general_channel.send(result)
 
 @bot.event
 async def on_ready():
     """
     Logged in check
     """
+    cctvbot.start()
     statusbot.start()
     print("Logged in!")
 
@@ -134,7 +165,7 @@ async def on_message(message):
 
 @bot.command()
 async def crack(ctx, *args):
-    """ cracking different hashes by rainbow table
+    """ Cracking different hashes by rainbow table
 
     -crack (hash): Cracks MD5, SHA-*, RIPEMD320
     """
@@ -147,7 +178,7 @@ async def crack(ctx, *args):
 
 @bot.command()
 async def leak(ctx, *args):
-    """ find account credentials from breached databases. (for #donator and #vpn)
+    """ Find account credentials from breached databases. (for #donator)
 
     -leak account (email_address)
     -leak domain (domain)
@@ -249,6 +280,47 @@ async def ping(ctx):
 
     result = f"**GPU:** {temp_gpu.split('temp=')[1]} / **CPU**: {round(float(temp_cpu)/1000.0,1)}'C\n"
     result += f"**Uptime:** {pc_uptime}"
+    await ctx.send(result)
+
+@bot.command()
+async def cctv(ctx, *args):
+    """ CCTV control menu (for #cctv)
+
+    -cctv start
+    -cctv stop
+    -cctv restart
+    -cctv status
+    """
+    channel_name = ctx.channel.name
+    result = ""
+
+    if channel_name not in ("cctv"):
+        result = ":warning: You don't have the permission to access this command."
+        await ctx.send(result)
+        return
+
+    if args[0] not in ("start", "stop", "restart", "status"):
+        result = ":warning: Invalid command. Check -help vpn for more information."
+        await ctx.send(result)
+        return
+
+    if args[0] == "start":
+        res = os.popen("sudo systemctl start motion.service 2>&1").read()
+        result = ":white_check_mark: Start Successful!"
+
+    if args[0] == "stop":
+        res = os.popen("sudo systemctl stop motion.service 2>&1").read()
+        result = ":white_check_mark: Stop Successful!"
+
+    if args[0] == "restart":
+        res = os.popen("sudo systemctl restart motion.service 2>&1").read()
+        result = ":white_check_mark: Stop Successful!"
+
+    if args[0] == "status":
+        res = os.popen("sudo systemctl status motion.service 2>&1").read()
+        result = ":white_check_mark: Service Status\n"
+        result += f"```\n{res}```"
+
     await ctx.send(result)
 
 if __name__ == "__main__":
